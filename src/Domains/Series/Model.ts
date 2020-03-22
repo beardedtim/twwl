@@ -7,7 +7,8 @@ const SeriesSchema = new Mongoose.Schema<ISeries>(
     title: String,
     description: String,
     last_updated: String,
-    created_at: String
+    created_at: String,
+    status: String
   },
   {
     strict: Config.IS_PRODUCTION,
