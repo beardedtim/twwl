@@ -58,6 +58,15 @@ class SeriesRepository {
     return this.#connection.findById(id).lean().exec();
   }
 
+  batchGetById(ids: readonly string[]) {
+    this.#log.trace({ ids }, "Getting Batch Series by IDs");
+
+    return this.#connection
+      .find({ _id: { $in: [...ids] } })
+      .lean()
+      .exec();
+  }
+
   createSeries(series: SeriesCreation) {
     this.#log.trace({ series }, "Created Series");
 

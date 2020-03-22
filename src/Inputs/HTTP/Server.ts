@@ -10,10 +10,10 @@ import InputLogger from "@/Inputs/HTTP/Logger";
 class Server {
   #Application: express.Application;
   #Instance?: HTTP.Server;
-  log: Logger;
+  #log: Logger;
 
-  constructor({ logger }: { logger?: Logger } = {}) {
-    this.log = logger || InputLogger;
+  constructor({ log }: { log?: Logger } = {}) {
+    this.#log = log || InputLogger;
     this.#Application = express();
   }
 
@@ -23,7 +23,7 @@ class Server {
 
   start(cb: () => void) {
     // Apply the middleware
-    ApplyMiddleware({ logger: this.log, app: this.#Application });
+    ApplyMiddleware({ logger: this.#log, app: this.#Application });
     // Apply the routes
     this.applyRoutes();
 

@@ -1,60 +1,14 @@
-import { ApolloServer, gql, ServerInfo } from "apollo-server";
+import { ApolloServer, ServerInfo } from "apollo-server";
 
-import { GraphQLDate, GraphQLTime, GraphQLDateTime } from "graphql-iso-date";
-import { skip, combineResolvers } from "graphql-resolvers";
+import EpisodeRepository from "@/Domains/Episodes/Repository";
+import SeriesRepository from "@/Domains/Series/Repository";
 
 import Config from "@/Inputs/GraphQL/Config";
 import { Logger } from "pino";
+import DataLoader from "dataloader";
 import Log from "./Logger";
-
-const typeDefs = gql`
-  scalar Date
-  scalar Time
-  scalar DateTime
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  type Series {
-    title: String
-    description: String
-    created_at: DateTime
-    last_updated: DateTime
-    _id: ID!
-  }
-
-  type Query {
-    series: [Series]
-  }
-`;
-
-const series = [
-  {
-    title: "Harry Potter and the Chamber of Secrets",
-    description: "J.K. Rowling"
-  },
-  {
-    title: "Jurassic Park",
-    description: "Michael Crichton"
-  }
-];
-
-const logRequest = (msg: string) => (
-  root: any,
-  args: any,
-  { log }: any,
-  info: any
-) => {
-  log.trace({ root, args, info, msg });
-  return skip;
-};
-
-const resolvers = {
-  Query: {
-    series: combineResolvers(logRequest("Query::Series"), () => series)
-  },
-  Date: GraphQLDate,
-  Time: GraphQLTime,
-  DateTime: GraphQLDateTime
-};
+import resolvers from "./Resolvers";
+import typeDefs from "./TypeDefs";
 
 class Server {
   #server: ApolloServer;
@@ -67,11 +21,35 @@ class Server {
     this.#server = new ApolloServer({
       typeDefs,
       resolvers,
+      cors: true,
+      onHealthCheck: async req => {
+        this.#log.trace("Healthy!");
+        return true;
+      },
       context: (ctx: any) => this.context(ctx)
     });
   }
 
-  context = (_: any) => ({ log: this.#log });
+  context = (_: any) => {
+    const seriesRepo = new SeriesRepository();
+    const episodeRepo = new EpisodeRepository();
+
+    const loaders = {
+      series: new DataLoader((keys: readonly string[]) =>
+        seriesRepo.batchGetById(keys)
+      ),
+      episode: new DataLoader((keys: readonly string[]) =>
+        episodeRepo.batchGetByIds(keys)
+      )
+    };
+
+    const repos = {
+      series: seriesRepo,
+      episode: episodeRepo
+    };
+
+    return { log: this.#log, loaders, repos };
+  };
 
   start(cb: () => void) {
     this.#server.listen(Config.PORT).then(serverInfo => {

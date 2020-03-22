@@ -58,6 +58,21 @@ class EpisodesRepository {
     return this.#connection.findById(id).lean().exec();
   }
 
+  batchGetByIds(ids: readonly string[]) {
+    this.#log.trace({ ids }, "Getting Batch Episodes by IDs");
+
+    return this.#connection
+      .find({ _id: { $in: [...ids] } })
+      .lean()
+      .exec();
+  }
+
+  getEpisodesBySeriesId(id: string) {
+    this.#log.trace({ id }, "Getting Episodes by Series ID");
+
+    return this.#connection.find({ series_id: id }).lean().exec();
+  }
+
   createEpisode(series: EpisodesCreation) {
     this.#log.trace({ series }, "Created Episodes");
 
