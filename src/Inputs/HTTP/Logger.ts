@@ -1,10 +1,8 @@
-import createLogger from "@/Common/Logger";
+import createLogger from "@/Outputs/Logger";
 import Config from "@/Inputs/HTTP/Config";
 
-const logger = createLogger({
+export default createLogger({
   name: Config.NAME,
   level: Config.LEVEL,
   pretty: true
 });
-
-export default logger;

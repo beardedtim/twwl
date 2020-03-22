@@ -3,7 +3,7 @@ import { Series } from "@/Domains/Series/Types";
 import Config from "@/Domains/Series/Config";
 import ConnectAndGetModel from "@/Utils/mongoose/ConnectAndGetModel";
 import { Logger } from "pino";
-import createLogger from "@/Common/Logger";
+import createLogger from "@/Outputs/Logger";
 
 import "@/Domains/Series/Model";
 
