@@ -1,0 +1,12 @@
+version: "3"
+services:
+  # Let's start with a single mongodb database
+  # and have every domain key off the Database
+  # for their own data needs. We can change this
+  # (hopefully) easily in the future as long as
+  # we keep each Domain requesting their own
+  # connection and Mongoose instance
+  mongoose_datastore:
+    image: mongo
+    ports:
+      - "27017:27017"
